@@ -1,0 +1,99 @@
+project.ext {
+  groupId = 'info.klewitz'
+  artifactId = 'kaggle-forest'
+  version = new Date().format('yyyy-MM-dd-HH-mm-ss')
+}
+
+buildscript {
+  repositories {
+    mavenLocal()
+  }
+}
+
+apply plugin: 'groovy'
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'maven'
+
+jar.baseName = project.ext.artifactId
+jar.version = project.ext.version
+
+sourceSets.main.java.srcDirs = []
+sourceSets.test.java.srcDirs = []
+sourceSets.main.groovy.srcDirs = ['src/main/java', 'src/main/groovy']
+sourceSets.test.groovy.srcDirs = ['src/test/java', 'src/test/groovy']
+
+
+repositories {
+  mavenLocal()
+  mavenCentral()
+}
+
+compileJava {
+  sourceCompatibility = "1.8"
+  targetCompatibility = "1.8"
+}
+
+dependencies {
+
+
+  def springVersion = '4.0.3.RELEASE'
+
+
+  testCompile('org.testng:testng:6.7')
+  testCompile('org.easytesting:fest-assert:1.4')
+}
+
+test {
+  useTestNG()
+}
+
+jar {
+  manifest {
+    attributes 'Main-Class': 'de.hypoport.efi.bigdata.processor.Application'
+  }
+  //build a fat jar with included dependencies
+  from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+}
+
+
+task tagGit << {
+  exec {
+    commandLine 'git', 'tag', "${project.ext.version}"
+  }
+  exec {
+    commandLine 'git', 'push', '--tags'
+  }
+}
+
+tagGit.dependsOn uploadArchives
+
+task release(dependsOn: build) << {
+  uploadArchives.execute()
+  writeVersionTxt.execute()
+  tagGit.execute()
+  println "Release Version ${project.ext.version} uploaded to Nexus"
+}
+
+static String readVersionTxt() {
+  File file = new File("version.txt")
+  if (file.exists()) {
+    return file.text.trim()
+  }
+  else {
+    return "NO_VERSION_TXT_FOUND"
+  }
+}
+
+task startApplication(dependsOn: assemble) {
+  doLast {
+    javaexec {
+      main = "-jar";
+      args = ["build/libs/${project.ext.artifactId}-${project.ext.version}.jar"]
+    }
+  }
+}
+
+task wrapper(type: Wrapper) {
+  gradleVersion = '2.1'
+}
