@@ -36,9 +36,12 @@ compileJava {
 
 dependencies {
 
-
   def springVersion = '4.0.3.RELEASE'
 
+  compile('org.apache.mahout:mahout-core:0.9')
+  compile("org.springframework:spring-core:$springVersion")
+
+  compile('org.codehaus.groovy:groovy-all:2.3.3')
 
   testCompile('org.testng:testng:6.7')
   testCompile('org.easytesting:fest-assert:1.4')
