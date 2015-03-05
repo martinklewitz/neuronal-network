@@ -12,35 +12,42 @@ class NeuralNetworkNeurophLearner {
 
   private DataSet dataSet
   private MultiLayerPerceptron neuralNet
+  public boolean debug = true
 
   public static void main(String[] args) {
+    File f = new File('muyResults.txt')
     NeuralNetworkNeurophLearner networkNeurophLearner = new NeuralNetworkNeurophLearner()
     networkNeurophLearner.init("train.csv")
-    networkNeurophLearner.createNetwork()
-    networkNeurophLearner.printNetworkStats();
+    // networkNeurophLearner.debug = false
+    // [8,9,10,11,12,13,14,15,16,17,18,19,20].forEach {
+    [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].forEach {
+      networkNeurophLearner.createNetworkAndLearn(54, it, 7)
+      f.append(networkNeurophLearner.printNetworkStats())
+    }
   }
 
-  private void createNetwork() {
-    neuralNet = new MultiLayerPerceptron(54, 70, 7);
-    neuralNet.getLearningRule().setMaxIterations(20)
+  public void createNetworkAndLearn(int ... networkNodes) {
+    neuralNet = new MultiLayerPerceptron(networkNodes);
+    neuralNet.getLearningRule().setMaxIterations(1000)
     MomentumBackpropagation momentumBackpropagation = (MomentumBackpropagation) neuralNet.getLearningRule()
-    momentumBackpropagation.setMomentum(0.3d)
-    momentumBackpropagation.setLearningRate(0.15d)
+    momentumBackpropagation.setMomentum(0.25d)
+    momentumBackpropagation.setLearningRate(0.06d)
     neuralNet.getLearningRule().addListener(new LearningEventListener() {
-
       @Override
       void handleLearningEvent(LearningEvent event) {
         if (event.eventType == LearningEventType.EPOCH_ENDED) {
           MomentumBackpropagation backpropagation = (MomentumBackpropagation) event.source
           def iteration = backpropagation.getCurrentIteration()
-          println iteration + " total " + backpropagation.totalNetworkError
+          if (debug) {
+            println iteration + " totalError " + backpropagation.totalNetworkError
+          }
         }
       }
     })
     neuralNet.learn(dataSet);
   }
 
-  private void init(String fileName) {
+  public void init(String fileName) {
     dataSet = createDataSet(fileName)
   }
 
@@ -57,7 +64,7 @@ class NeuralNetworkNeurophLearner {
     return dataSet;
   }
 
-  public void printNetworkStats() {
+  public String printNetworkStats() {
     int hits = 0
     def hitStats = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     for (DataSetRow testSetRow : dataSet.getRows()) {
@@ -72,7 +79,11 @@ class NeuralNetworkNeurophLearner {
       }
       //println("Output: " + desiredIndex + "-" + outputIndex + " " + networkOutput[outputIndex] );
     }
-    println("Hits: " + hits + " " + hits / dataSet.getRows().size())
-    println("HitStats: " + Arrays.toString(hitStats))
+    def hitQuote = hits / dataSet.getRows().size()
+    def length = neuralNet.layers[1].neurons.length - 1
+    return "Network length " + length +
+           " Hits: " + hits + "/" + dataSet.rows.size() + " " + " quote " + hitQuote +
+           " HitStats: " + Arrays.toString(hitStats) +
+           " Error: " + neuralNet.getLearningRule().previousEpochError
   }
 }
