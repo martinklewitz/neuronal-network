@@ -15,20 +15,21 @@ class NeuralNetworkNeurophLearner {
   public boolean debug = true
 
   public static void main(String[] args) {
-    File f = new File('muyResults.txt')
+    Date date = new Date()
+    File f = new File(date.toGMTString() + '-results.txt')
     NeuralNetworkNeurophLearner networkNeurophLearner = new NeuralNetworkNeurophLearner()
     networkNeurophLearner.init("train.csv")
-    // networkNeurophLearner.debug = false
-    // [8,9,10,11,12,13,14,15,16,17,18,19,20].forEach {
     [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].forEach {
       networkNeurophLearner.createNetworkAndLearn(54, it, 7)
-      f.append(networkNeurophLearner.printNetworkStats())
+      def stats = networkNeurophLearner.printNetworkStats()
+      f.append(stats)
+      println stats
     }
   }
 
   public void createNetworkAndLearn(int ... networkNodes) {
     neuralNet = new MultiLayerPerceptron(networkNodes);
-    neuralNet.getLearningRule().setMaxIterations(1000)
+    neuralNet.getLearningRule().setMaxIterations(300)
     MomentumBackpropagation momentumBackpropagation = (MomentumBackpropagation) neuralNet.getLearningRule()
     momentumBackpropagation.setMomentum(0.25d)
     momentumBackpropagation.setLearningRate(0.06d)
@@ -66,7 +67,7 @@ class NeuralNetworkNeurophLearner {
 
   public String printNetworkStats() {
     int hits = 0
-    def hitStats = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    def hitStats = [0, 0, 0, 0, 0, 0, 0]
     for (DataSetRow testSetRow : dataSet.getRows()) {
       neuralNet.setInput(testSetRow.getInput());
       neuralNet.calculate();
@@ -77,13 +78,12 @@ class NeuralNetworkNeurophLearner {
         hits++
         hitStats[desiredIndex]++
       }
-      //println("Output: " + desiredIndex + "-" + outputIndex + " " + networkOutput[outputIndex] );
     }
     def hitQuote = hits / dataSet.getRows().size()
     def length = neuralNet.layers[1].neurons.length - 1
-    return "Network length " + length +
-           " Hits: " + hits + "/" + dataSet.rows.size() + " " + " quote " + hitQuote +
-           " HitStats: " + Arrays.toString(hitStats) +
-           " Error: " + neuralNet.getLearningRule().previousEpochError
+    return "Network: " + length +
+           " hits: " + hits + "/" + dataSet.rows.size() + " " + " quote: " + hitQuote +
+           " Stats: " + Arrays.toString(hitStats) +
+           " Error: " + neuralNet.getLearningRule().previousEpochError + '\n'
   }
 }
