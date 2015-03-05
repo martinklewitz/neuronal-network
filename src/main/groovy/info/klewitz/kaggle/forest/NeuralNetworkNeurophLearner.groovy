@@ -12,57 +12,67 @@ class NeuralNetworkNeurophLearner {
 
   private DataSet dataSet
   private MultiLayerPerceptron neuralNet
-  public boolean debug = true
+  private int iterations
+  private double learningRate
+  private double momentum
+
+  NeuralNetworkNeurophLearner(int iterations, double learningRate, double momentum) {
+    this.iterations = iterations
+    this.learningRate = learningRate
+    this.momentum = momentum
+  }
 
   public static void main(String[] args) {
     Date date = new Date()
-    File f = new File(date.toGMTString() + '-results.txt')
-    NeuralNetworkNeurophLearner networkNeurophLearner = new NeuralNetworkNeurophLearner()
-    networkNeurophLearner.init("train.csv")
-    [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].forEach {
+    File f = new File(date.toLocaleString() + '-results.txt')
+    NeuralNetworkNeurophLearner networkNeurophLearner = new NeuralNetworkNeurophLearner(1000, 0.02d, 0.15d)
+    Normalizer normalizer = new Normalizer()
+    List<List<Double>> array = normalizer.read("train.csv").removeRow(0).spreadIntegerValueAsRows(54, 7).normalize().getData()
+    networkNeurophLearner.init(array)
+    [12, 13, 14, 15, 16].forEach {
       networkNeurophLearner.createNetworkAndLearn(54, it, 7)
       def stats = networkNeurophLearner.printNetworkStats()
+      f.append(networkNeurophLearner.getGeneralStats())
       f.append(stats)
       println stats
+      println networkNeurophLearner.getGeneralStats()
     }
+  }
+
+  private String getGeneralStats() {
+    def length = neuralNet.layers[1].neurons.length - 1
+    return 'hiddenNodes ' + length + ' learning: ' + learningRate + ' momentum ' + momentum + ' iterations ' + iterations + ' \n'
   }
 
   public void createNetworkAndLearn(int ... networkNodes) {
     neuralNet = new MultiLayerPerceptron(networkNodes);
-    neuralNet.getLearningRule().setMaxIterations(300)
-    MomentumBackpropagation momentumBackpropagation = (MomentumBackpropagation) neuralNet.getLearningRule()
-    momentumBackpropagation.setMomentum(0.25d)
-    momentumBackpropagation.setLearningRate(0.06d)
+    MomentumBackpropagation momentumBackpropagation = new MomentumBackpropagation()
+    momentumBackpropagation.setMomentum(momentum)
+    momentumBackpropagation.setLearningRate(learningRate)
+    neuralNet.setLearningRule(momentumBackpropagation)
+    momentumBackpropagation.setNeuralNetwork(neuralNet)
+    neuralNet.getLearningRule().setMaxIterations(iterations)
     neuralNet.getLearningRule().addListener(new LearningEventListener() {
       @Override
       void handleLearningEvent(LearningEvent event) {
         if (event.eventType == LearningEventType.EPOCH_ENDED) {
           MomentumBackpropagation backpropagation = (MomentumBackpropagation) event.source
           def iteration = backpropagation.getCurrentIteration()
-          if (debug) {
-            println iteration + " totalError " + backpropagation.totalNetworkError
-          }
+          println iteration + " totalError " + backpropagation.totalNetworkError
         }
       }
     })
     neuralNet.learn(dataSet);
   }
 
-  public void init(String fileName) {
-    dataSet = createDataSet(fileName)
-  }
-
-  private DataSet createDataSet(String inputFileName) {
-    Normalizer normalizer = new Normalizer()
-    def array = normalizer.read(inputFileName).removeRow(0).spreadIntegerValueAsRows(54, 7).normalize().getData()
-    DataSet dataSet = new DataSet(54, 7);
-    for (int i = 0; i < array.size(); i++) {
-      double[] inputs = array[i].subList(0, 54).toArray()
-      double[] outputs = array[i].subList(54, 61).toArray()
+  public void init(List<List<Double>> dataArray) {
+    dataSet = new DataSet(54, 7)
+    for (int i = 0; i < dataArray.size(); i++) {
+      double[] inputs = dataArray[i].subList(0, 54).toArray()
+      double[] outputs = dataArray[i].subList(54, 61).toArray()
       //println 'expected ' + outputs
       dataSet.addRow(new DataSetRow(inputs, outputs));
     }
-    return dataSet;
   }
 
   public String printNetworkStats() {
@@ -80,9 +90,7 @@ class NeuralNetworkNeurophLearner {
       }
     }
     def hitQuote = hits / dataSet.getRows().size()
-    def length = neuralNet.layers[1].neurons.length - 1
-    return "Network: " + length +
-           " hits: " + hits + "/" + dataSet.rows.size() + " " + " quote: " + hitQuote +
+    return " hits: " + hits + "/" + dataSet.rows.size() + " " + " quote: " + hitQuote +
            " Stats: " + Arrays.toString(hitStats) +
            " Error: " + neuralNet.getLearningRule().previousEpochError + '\n'
   }
