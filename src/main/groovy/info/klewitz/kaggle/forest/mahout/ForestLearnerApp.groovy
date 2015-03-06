@@ -1,14 +1,10 @@
-package info.klewitz.kaggle.forest
+package info.klewitz.kaggle.forest.mahout
 
 import com.google.common.base.Charsets
 import com.google.common.collect.Lists
 import com.google.common.io.Resources
 import org.apache.mahout.classifier.AbstractVectorClassifier
-import org.apache.mahout.classifier.OnlineLearner
-import org.apache.mahout.classifier.naivebayes.StandardNaiveBayesClassifier
-import org.apache.mahout.classifier.sgd.AdaptiveLogisticRegression
 import org.apache.mahout.classifier.sgd.GradientMachine
-import org.apache.mahout.classifier.sgd.L2
 import org.apache.mahout.classifier.sgd.OnlineLogisticRegression
 import org.apache.mahout.classifier.sgd.PassiveAggressive
 import org.apache.mahout.classifier.sgd.UniformPrior
@@ -30,7 +26,7 @@ public class ForestLearnerApp {
     app.run(new OnlineLogisticRegression(8, ForestLearnerApp.CAT_NUMBER, new UniformPrior()).learningRate(50));
     app.run(new OnlineLogisticRegression(8, ForestLearnerApp.CAT_NUMBER, new UniformPrior()).learningRate(2));
     app.run(new PassiveAggressive(8, ForestLearnerApp.CAT_NUMBER));
-    app.run(new GradientMachine(ForestLearnerApp.CAT_NUMBER,10,54).learningRate(0.1).regularization(0.01));
+    app.run(new GradientMachine(ForestLearnerApp.CAT_NUMBER, 10, 54).learningRate(0.1).regularization(0.01));
   }
 
   public void init() {
@@ -46,20 +42,20 @@ public class ForestLearnerApp {
         v.set(i, Double.parseDouble(values[i]));
       }
       this.data.add(v);
-      v.set(0,Double.parseDouble(values[0]))
-      this.expectedTypes.put(values[0],values[CAT_NUMBER+1])
+      v.set(0, Double.parseDouble(values[0]))
+      this.expectedTypes.put(values[0], values[CAT_NUMBER + 1])
     }
   }
 
   public void run(AbstractVectorClassifier learner) {
-    train( data, learner)
+    train(data, learner)
 
     int fit = 0
     int nonFit = 0
     for (int i = SPLIT_COUNT; i < data.size(); i++) {
-      Vector classificationVector = learner.classify(data.get(i-1));
+      Vector classificationVector = learner.classify(data.get(i - 1));
       int maxLikelihoodType = classificationVector.maxValueIndex()
-      int expectedType = Integer.parseInt(this.expectedTypes.get(""+(i)))
+      int expectedType = Integer.parseInt(this.expectedTypes.get("" + (i)))
       if (expectedType == maxLikelihoodType) {
         fit++
       }

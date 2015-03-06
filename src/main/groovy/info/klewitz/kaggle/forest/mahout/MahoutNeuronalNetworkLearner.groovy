@@ -1,4 +1,4 @@
-package info.klewitz.kaggle.forest
+package info.klewitz.kaggle.forest.mahout
 
 import org.apache.mahout.classifier.mlp.MultilayerPerceptron
 import org.apache.mahout.classifier.mlp.NeuralNetwork
