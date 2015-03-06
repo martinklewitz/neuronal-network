@@ -24,24 +24,31 @@ class NeuralNetworkNeurophLearner {
 
   public static void main(String[] args) {
     Date date = new Date()
-    File f = new File(date.toLocaleString() + '-results.txt')
-    NeuralNetworkNeurophLearner networkNeurophLearner = new NeuralNetworkNeurophLearner(1000, 0.02d, 0.15d)
+    def dateName = date.toLocaleString()
+    File f = new File(dateName + '-results.txt')
+    NeuralNetworkNeurophLearner networkNeurophLearner = new NeuralNetworkNeurophLearner(10000, 0.02d, 0.12d)
     Normalizer normalizer = new Normalizer()
     List<List<Double>> array = normalizer.read("train.csv").removeRow(0).spreadIntegerValueAsRows(54, 7).normalize().getData()
     networkNeurophLearner.init(array)
-    [12, 13, 14, 15, 16].forEach {
+    [12, 13, 14, 15, 16, 20, 30].forEach {
       networkNeurophLearner.createNetworkAndLearn(54, it, 7)
       def stats = networkNeurophLearner.printNetworkStats()
       f.append(networkNeurophLearner.getGeneralStats())
       f.append(stats)
-      println stats
       println networkNeurophLearner.getGeneralStats()
+      println stats
+      networkNeurophLearner.writeModel(dateName)
     }
   }
 
   private String getGeneralStats() {
     def length = neuralNet.layers[1].neurons.length - 1
     return 'hiddenNodes ' + length + ' learning: ' + learningRate + ' momentum ' + momentum + ' iterations ' + iterations + ' \n'
+  }
+
+  public writeModel(String filename) {
+    def length = neuralNet.layers[1].neurons.length - 1
+    neuralNet.save(filename + '-' + length + '.out')
   }
 
   public void createNetworkAndLearn(int ... networkNodes) {
