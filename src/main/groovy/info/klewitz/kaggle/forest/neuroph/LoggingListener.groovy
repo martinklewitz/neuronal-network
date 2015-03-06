@@ -1,4 +1,4 @@
-package info.klewitz.kaggle.forest
+package info.klewitz.kaggle.forest.neuroph
 
 import org.neuroph.core.events.LearningEvent
 import org.neuroph.core.events.LearningEventListener

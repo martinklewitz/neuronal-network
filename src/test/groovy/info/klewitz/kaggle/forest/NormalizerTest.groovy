@@ -1,5 +1,7 @@
 package info.klewitz.kaggle.forest
 
+import info.klewitz.kaggle.forest.utils.Normalizer
+
 class NormalizerTest extends GroovyTestCase {
 
   Normalizer normalizer

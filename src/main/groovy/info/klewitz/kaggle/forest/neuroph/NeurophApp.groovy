@@ -1,4 +1,6 @@
-package info.klewitz.kaggle.forest
+package info.klewitz.kaggle.forest.neuroph
+
+import info.klewitz.kaggle.forest.utils.Normalizer
 
 public class NeurophApp {
 

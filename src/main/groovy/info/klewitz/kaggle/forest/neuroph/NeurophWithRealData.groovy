@@ -1,5 +1,6 @@
-package info.klewitz.kaggle.forest
+package info.klewitz.kaggle.forest.neuroph
 
+import info.klewitz.kaggle.forest.utils.Normalizer
 import org.springframework.core.io.ClassPathResource
 
 class NeurophWithRealData {

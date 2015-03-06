@@ -1,4 +1,4 @@
-package info.klewitz.kaggle.forest
+package info.klewitz.kaggle.forest.utils
 
 import com.google.common.base.Charsets
 import com.google.common.io.Resources

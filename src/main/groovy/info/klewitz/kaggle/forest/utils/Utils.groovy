@@ -1,4 +1,4 @@
-package info.klewitz.kaggle.forest
+package info.klewitz.kaggle.forest.utils
 
 class Utils {
 

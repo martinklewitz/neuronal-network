@@ -1,5 +1,6 @@
-package info.klewitz.kaggle.forest
+package info.klewitz.kaggle.forest.neuroph
 
+import info.klewitz.kaggle.forest.utils.Utils
 import org.neuroph.core.data.DataSet
 import org.neuroph.core.data.DataSetRow
 import org.neuroph.nnet.MultiLayerPerceptron
