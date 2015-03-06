@@ -63,10 +63,10 @@ class NeuralNetworkNeurophLearner {
     }
   }
 
-  public String printNetworkStats() {
+  public String printNetworkStats(DataSet testData) {
     int hits = 0
     def hitStats = [0, 0, 0, 0, 0, 0, 0]
-    for (DataSetRow testSetRow : dataSet.getRows()) {
+    for (DataSetRow testSetRow : testData.getRows()) {
       neuralNet.setInput(testSetRow.getInput());
       neuralNet.calculate();
       double[] networkOutput = neuralNet.getOutput();
@@ -77,8 +77,8 @@ class NeuralNetworkNeurophLearner {
         hitStats[desiredIndex]++
       }
     }
-    def hitQuote = hits / dataSet.getRows().size()
-    return " hits: " + hits + "/" + dataSet.rows.size() + " " + " quote: " + hitQuote +
+    def hitQuote = hits / testData.getRows().size()
+    return " hits: " + hits + "/" + testData.rows.size() + " " + " quote: " + hitQuote +
            " Stats: " + Arrays.toString(hitStats) +
            " Error: " + neuralNet.getLearningRule().previousEpochError + '\n'
   }

@@ -8,7 +8,7 @@ class NeurophLoadAndRun {
     Date date = new Date()
     def dateName = date.toLocaleString()
     File outFileName = new File(dateName + '-results.txt')
-    NeuralNetworkNeurophLearner networkNeurophLearner = new NeuralNetworkNeurophLearner(1000, 0.01d, 0.1d)
+    NeuralNetworkNeurophLearner networkNeurophLearner = new NeuralNetworkNeurophLearner(1000, 0.02d, 0.15d)
     networkNeurophLearner.loadModel(new ClassPathResource('network-15-good_2.out').inputStream)
     Normalizer normalizer = new Normalizer()
     List<List<Double>> array = normalizer.read("train.csv").removeRow(0).spreadIntegerValueAsRows(54, 7).normalize().getData()
@@ -18,7 +18,7 @@ class NeurophLoadAndRun {
     networkNeurophLearner.init(array)
     networkNeurophLearner.learn()
 
-    def stats = networkNeurophLearner.printNetworkStats()
+    def stats = networkNeurophLearner.printNetworkStats(networkNeurophLearner.dataSet)
     outFileName.append(networkNeurophLearner.getGeneralStats())
     outFileName.append(stats)
     println networkNeurophLearner.getGeneralStats()

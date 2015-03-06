@@ -15,7 +15,7 @@ public class NeurophApp {
 
       networkNeurophLearner.learn()
 
-      def stats = networkNeurophLearner.printNetworkStats()
+      def stats = networkNeurophLearner.printNetworkStats(networkNeurophLearner.dataSet)
       f.append(networkNeurophLearner.getGeneralStats())
       f.append(stats)
       println networkNeurophLearner.getGeneralStats()
