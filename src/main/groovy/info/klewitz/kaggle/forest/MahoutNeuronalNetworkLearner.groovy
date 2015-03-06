@@ -3,7 +3,7 @@ package info.klewitz.kaggle.forest
 import org.apache.mahout.classifier.mlp.MultilayerPerceptron
 import org.apache.mahout.classifier.mlp.NeuralNetwork
 
-class NeuralNetworkLearner {
+class MahoutNeuronalNetworkLearner {
 
   public static final int CAT_NUMBER = 54
   public static final int SPLIT_COUNT = 14000
@@ -11,7 +11,7 @@ class NeuralNetworkLearner {
   int numOfClasses = 7
 
   public static void main(String[] args) {
-    NeuralNetworkLearner app = new NeuralNetworkLearner()
+    MahoutNeuronalNetworkLearner app = new MahoutNeuronalNetworkLearner()
     app.init()
     app.run()
   }

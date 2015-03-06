@@ -2,9 +2,6 @@ package info.klewitz.kaggle.forest
 
 import org.neuroph.core.data.DataSet
 import org.neuroph.core.data.DataSetRow
-import org.neuroph.core.events.LearningEvent
-import org.neuroph.core.events.LearningEventListener
-import org.neuroph.core.events.LearningEventType
 import org.neuroph.nnet.MultiLayerPerceptron
 import org.neuroph.nnet.learning.MomentumBackpropagation
 
@@ -22,26 +19,7 @@ class NeuralNetworkNeurophLearner {
     this.momentum = momentum
   }
 
-  public static void main(String[] args) {
-    Date date = new Date()
-    def dateName = date.toLocaleString()
-    File f = new File(dateName + '-results.txt')
-    NeuralNetworkNeurophLearner networkNeurophLearner = new NeuralNetworkNeurophLearner(10000, 0.02d, 0.12d)
-    Normalizer normalizer = new Normalizer()
-    List<List<Double>> array = normalizer.read("train.csv").removeRow(0).spreadIntegerValueAsRows(54, 7).normalize().getData()
-    networkNeurophLearner.init(array)
-    [12, 13, 14, 15, 16, 20, 30].forEach {
-      networkNeurophLearner.createNetworkAndLearn(54, it, 7)
-      def stats = networkNeurophLearner.printNetworkStats()
-      f.append(networkNeurophLearner.getGeneralStats())
-      f.append(stats)
-      println networkNeurophLearner.getGeneralStats()
-      println stats
-      networkNeurophLearner.writeModel(dateName)
-    }
-  }
-
-  private String getGeneralStats() {
+  public String getGeneralStats() {
     def length = neuralNet.layers[1].neurons.length - 1
     return 'hiddenNodes ' + length + ' learning: ' + learningRate + ' momentum ' + momentum + ' iterations ' + iterations + ' \n'
   }
@@ -51,24 +29,27 @@ class NeuralNetworkNeurophLearner {
     neuralNet.save(filename + '-' + length + '.out')
   }
 
-  public void createNetworkAndLearn(int ... networkNodes) {
+  public loadModel(InputStream inputStream) {
+    neuralNet = (MultiLayerPerceptron) MultiLayerPerceptron.load(inputStream)
+    createPropagation()
+  }
+
+  public void createNetwork(int ... networkNodes) {
     neuralNet = new MultiLayerPerceptron(networkNodes);
+    createPropagation()
+  }
+
+  private void createPropagation() {
     MomentumBackpropagation momentumBackpropagation = new MomentumBackpropagation()
     momentumBackpropagation.setMomentum(momentum)
     momentumBackpropagation.setLearningRate(learningRate)
     neuralNet.setLearningRule(momentumBackpropagation)
     momentumBackpropagation.setNeuralNetwork(neuralNet)
     neuralNet.getLearningRule().setMaxIterations(iterations)
-    neuralNet.getLearningRule().addListener(new LearningEventListener() {
-      @Override
-      void handleLearningEvent(LearningEvent event) {
-        if (event.eventType == LearningEventType.EPOCH_ENDED) {
-          MomentumBackpropagation backpropagation = (MomentumBackpropagation) event.source
-          def iteration = backpropagation.getCurrentIteration()
-          println iteration + " totalError " + backpropagation.totalNetworkError
-        }
-      }
-    })
+    neuralNet.getLearningRule().addListener(new LoggingListener())
+  }
+
+  public void learn() {
     neuralNet.learn(dataSet);
   }
 
