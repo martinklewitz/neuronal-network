@@ -54,7 +54,12 @@ class Normalizer {
       lists.eachWithIndex { Double entry, int i ->
         double range = Math.abs(min[i] - max[i])
         if (range > 0) {
-          lists[i] = (entry + Math.abs(min[i])) / range
+          if (min[i] < 0) {
+            lists[i] = (entry + Math.abs(min[i])) / range
+          }
+          else {
+            lists[i] = (entry - min[i]) / range
+          }
         }
         else {
         }

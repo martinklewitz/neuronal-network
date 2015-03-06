@@ -53,19 +53,20 @@ class NeuralNetworkNeurophLearner {
     neuralNet.learn(dataSet);
   }
 
-  public void init(List<List<Double>> dataArray) {
-    dataSet = new DataSet(54, 7)
+  public void init(List<List<Double>> dataArray, Integer dataColumns, Integer outputColumns) {
+    dataSet = new DataSet(dataColumns, outputColumns)
     for (int i = 0; i < dataArray.size(); i++) {
-      double[] inputs = dataArray[i].subList(0, 54).toArray()
-      double[] outputs = dataArray[i].subList(54, 61).toArray()
+      double[] inputs = dataArray[i].subList(0, dataColumns).toArray()
+      double[] outputs = dataArray[i].subList(dataColumns, dataColumns + outputColumns).toArray()
       //println 'expected ' + outputs
       dataSet.addRow(new DataSetRow(inputs, outputs));
     }
   }
 
-  public String printNetworkStats(DataSet testData) {
-    int hits = 0
+  public String runTest(DataSet testData) {
+    long hits = 0
     def hitStats = [0, 0, 0, 0, 0, 0, 0]
+    StringBuilder builder = new StringBuilder()
     for (DataSetRow testSetRow : testData.getRows()) {
       neuralNet.setInput(testSetRow.getInput());
       neuralNet.calculate();
@@ -78,8 +79,29 @@ class NeuralNetworkNeurophLearner {
       }
     }
     def hitQuote = hits / testData.getRows().size()
-    return " hits: " + hits + "/" + testData.rows.size() + " " + " quote: " + hitQuote +
-           " Stats: " + Arrays.toString(hitStats) +
-           " Error: " + neuralNet.getLearningRule().previousEpochError + '\n'
+    builder.append(" hits: " + hits + "/" + testData.rows.size() + " " + " quote: " + hitQuote)
+    builder.append(" Stats: " + Arrays.toString(hitStats))
+    builder.append(" Error: " + neuralNet.getLearningRule().previousEpochError + '\n')
+    return builder.toString()
+  }
+
+  public String runCalculation(DataSet testData, long startIndex) {
+    long currentIndex = 0
+    def hitStats = [0, 0, 0, 0, 0, 0, 0]
+    StringBuilder builder = new StringBuilder()
+    for (DataSetRow testSetRow : testData.getRows()) {
+      neuralNet.setInput(testSetRow.getInput());
+      neuralNet.calculate();
+      double[] networkOutput = neuralNet.getOutput();
+      def outputIndex = Utils.getMaxIndex(networkOutput)
+      def dataNumber = startIndex + currentIndex
+      def outputKey = outputIndex + 1
+      builder.append(dataNumber + ' ,' + outputKey + '\n')
+      //builder.append(Arrays.toString(networkOutput) + '\n')
+      hitStats[outputIndex]++
+      currentIndex++
+    }
+    println "Stats: " + Arrays.toString(hitStats)
+    return builder.toString()
   }
 }

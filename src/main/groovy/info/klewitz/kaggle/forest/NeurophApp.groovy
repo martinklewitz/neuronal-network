@@ -6,16 +6,17 @@ public class NeurophApp {
     Date date = new Date()
     def dateName = date.toLocaleString()
     File f = new File(dateName + '-results.txt')
-    NeuralNetworkNeurophLearner networkNeurophLearner = new NeuralNetworkNeurophLearner(10000, 0.02d, 0.12d)
+    NeuralNetworkNeurophLearner networkNeurophLearner = new NeuralNetworkNeurophLearner(1000, 0.02d, 0.12d)
     Normalizer normalizer = new Normalizer()
     List<List<Double>> array = normalizer.read("train.csv").removeRow(0).spreadIntegerValueAsRows(54, 7).normalize().getData()
-    networkNeurophLearner.init(array)
-    [12, 13, 14, 15, 16, 20, 30].forEach {
+    Collections.shuffle(array)
+    networkNeurophLearner.init(array.subList(0, 14000), 54, 7)
+    [14, 15, 16].forEach {
       networkNeurophLearner.createNetwork(54, it, 7)
-
       networkNeurophLearner.learn()
 
-      def stats = networkNeurophLearner.printNetworkStats(networkNeurophLearner.dataSet)
+      networkNeurophLearner.init(array.subList(14000, 15120), 54, 7)
+      def stats = networkNeurophLearner.runTest(networkNeurophLearner.dataSet)
       f.append(networkNeurophLearner.getGeneralStats())
       f.append(stats)
       println networkNeurophLearner.getGeneralStats()
