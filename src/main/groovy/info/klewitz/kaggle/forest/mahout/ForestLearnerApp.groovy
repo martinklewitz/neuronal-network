@@ -3,6 +3,7 @@ package info.klewitz.kaggle.forest.mahout
 import com.google.common.collect.Lists
 import info.klewitz.kaggle.forest.utils.Normalizer
 import org.apache.mahout.classifier.AbstractVectorClassifier
+import org.apache.mahout.classifier.OnlineLearner
 import org.apache.mahout.classifier.sgd.GradientMachine
 import org.apache.mahout.classifier.sgd.OnlineLogisticRegression
 import org.apache.mahout.classifier.sgd.PassiveAggressive
@@ -20,11 +21,11 @@ public class ForestLearnerApp {
   public static void main(String[] args) {
     ForestLearnerApp app = new ForestLearnerApp()
     app.init()
-    app.run(new OnlineLogisticRegression(8, ForestLearnerApp.CAT_NUMBER, new UniformPrior()));
-    app.run(new OnlineLogisticRegression(8, ForestLearnerApp.CAT_NUMBER, new UniformPrior()).learningRate(0.05));
-    app.run(new OnlineLogisticRegression(8, ForestLearnerApp.CAT_NUMBER, new UniformPrior()).learningRate(2));
-    app.run(new PassiveAggressive(8, ForestLearnerApp.CAT_NUMBER));
-    app.run(new GradientMachine(ForestLearnerApp.CAT_NUMBER, 10, 54).learningRate(0.1).regularization(0.01));
+    app.run(new OnlineLogisticRegression(7, ForestLearnerApp.CAT_NUMBER, new UniformPrior()));
+    app.run(new OnlineLogisticRegression(7, ForestLearnerApp.CAT_NUMBER, new UniformPrior()).learningRate(0.05));
+    app.run(new OnlineLogisticRegression(7, ForestLearnerApp.CAT_NUMBER, new UniformPrior()).learningRate(0.2));
+    app.run(new PassiveAggressive(7, ForestLearnerApp.CAT_NUMBER));
+    app.run(new GradientMachine(ForestLearnerApp.CAT_NUMBER, 10, 7).learningRate(0.1));
   }
 
   public void init() {
@@ -43,14 +44,14 @@ public class ForestLearnerApp {
     }
   }
 
-  public void run(AbstractVectorClassifier learner) {
+  public void run(OnlineLearner learner) {
     train(data, learner)
 
     int fit = 0
     int nonFit = 0
     for (int i = SPLIT_COUNT; i < data.size(); i++) {
       Vector classificationVector = learner.classify(data.get(i - 1));
-      int maxLikelihoodType = classificationVector.maxValueIndex()
+      int maxLikelihoodType = classificationVector.maxValueIndex() + 1
       int expectedType = expectedTypes.get("" + i).intValue()
       if (expectedType == maxLikelihoodType) {
         fit++
@@ -67,7 +68,7 @@ public class ForestLearnerApp {
       Double get = expectedTypes.get("" + i)
       def expectedCategory = get.intValue()
       def vector = data.get(i)
-      learner.train(expectedCategory, vector);
+      learner.train(expectedCategory - 1, vector);
     }
   }
 }
