@@ -1,8 +1,7 @@
 package info.klewitz.kaggle.forest.mahout
 
-import com.google.common.base.Charsets
 import com.google.common.collect.Lists
-import com.google.common.io.Resources
+import info.klewitz.kaggle.forest.utils.Normalizer
 import org.apache.mahout.classifier.AbstractVectorClassifier
 import org.apache.mahout.classifier.sgd.GradientMachine
 import org.apache.mahout.classifier.sgd.OnlineLogisticRegression
@@ -15,35 +14,32 @@ public class ForestLearnerApp {
 
   public static final int CAT_NUMBER = 54
   public static final int SPLIT_COUNT = 14000
-  private HashMap expectedTypes
-  private List<String> raw
+  private HashMap<String, Double> expectedTypes
   private List<Vector> data
 
   public static void main(String[] args) {
     ForestLearnerApp app = new ForestLearnerApp()
     app.init()
     app.run(new OnlineLogisticRegression(8, ForestLearnerApp.CAT_NUMBER, new UniformPrior()));
-    app.run(new OnlineLogisticRegression(8, ForestLearnerApp.CAT_NUMBER, new UniformPrior()).learningRate(50));
+    app.run(new OnlineLogisticRegression(8, ForestLearnerApp.CAT_NUMBER, new UniformPrior()).learningRate(0.05));
     app.run(new OnlineLogisticRegression(8, ForestLearnerApp.CAT_NUMBER, new UniformPrior()).learningRate(2));
     app.run(new PassiveAggressive(8, ForestLearnerApp.CAT_NUMBER));
     app.run(new GradientMachine(ForestLearnerApp.CAT_NUMBER, 10, 54).learningRate(0.1).regularization(0.01));
   }
 
   public void init() {
-    raw = Resources.readLines(Resources.getResource("train.csv"), Charsets.UTF_8)
+    Normalizer normalizer = new Normalizer()
+    List<List<Double>> array = normalizer.read("train.csv").normalize(1, 53).getData()
     data = Lists.newArrayList()
     expectedTypes = new HashMap<>()
 
-    for (String line : this.raw.subList(1, this.raw.size())) {
-      String[] values = line.split(",")
-      Vector v = new DenseVector(values.size() - 2);
-
-      for (int i = 1; i < values.length - 2; i++) {
-        v.set(i, Double.parseDouble(values[i]));
+    for (List<Double> line : array) {
+      Vector v = new DenseVector(line.size() - 2);
+      for (int i = 0; i < line.size() - 2; i++) {
+        v.set(i, line.get(i + 1))
       }
-      this.data.add(v);
-      v.set(0, Double.parseDouble(values[0]))
-      this.expectedTypes.put(values[0], values[CAT_NUMBER + 1])
+      data.add(v);
+      expectedTypes.put(line.get(0).intValue().toString(), line.get(55))
     }
   }
 
@@ -55,7 +51,7 @@ public class ForestLearnerApp {
     for (int i = SPLIT_COUNT; i < data.size(); i++) {
       Vector classificationVector = learner.classify(data.get(i - 1));
       int maxLikelihoodType = classificationVector.maxValueIndex()
-      int expectedType = Integer.parseInt(this.expectedTypes.get("" + (i)))
+      int expectedType = expectedTypes.get("" + i).intValue()
       if (expectedType == maxLikelihoodType) {
         fit++
       }
@@ -68,7 +64,8 @@ public class ForestLearnerApp {
 
   private void train(ArrayList<Vector> data, AbstractVectorClassifier learner) {
     for (int i = 1; i < SPLIT_COUNT; i++) {
-      def expectedCategory = Integer.parseInt(expectedTypes.get("" + i))
+      Double get = expectedTypes.get("" + i)
+      def expectedCategory = get.intValue()
       def vector = data.get(i)
       learner.train(expectedCategory, vector);
     }

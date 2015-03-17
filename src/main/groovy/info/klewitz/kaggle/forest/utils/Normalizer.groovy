@@ -7,6 +7,8 @@ class Normalizer {
 
   public static final String COMMENT = "#"
   public static final String splitter = ","
+  private Double[] min;
+  private Double[] max;
 
   private List<List<Double>> rawData
 
@@ -62,6 +64,42 @@ class Normalizer {
           }
         }
         else {
+        }
+      }
+    }
+    return this
+  }
+
+  public Normalizer normalize(long fromRow, long toRow) {
+    def columns = rawData[0].size()
+    min = new Double[columns]
+    max = new Double[columns]
+    rawData[0].eachWithIndex { val, int index ->
+      this.min[index] = val
+      this.max[index] = val
+    }
+    rawData.each {
+      it.eachWithIndex { Double entry, int i ->
+        if (this.min[i] > entry) {
+          this.min[i] = entry
+        }
+        if (this.max[i] < entry) {
+          this.max[i] = entry
+        }
+      }
+    }
+    rawData.each { lists ->
+      lists.eachWithIndex { Double entry, int i ->
+        if (i >= fromRow && i <= toRow) {
+          double range = Math.abs(this.min[i] - this.max[i])
+          if (range > 0) {
+            if (this.min[i] < 0) {
+              lists[i] = (entry + Math.abs(this.min[i])) / range
+            }
+            else {
+              lists[i] = (entry - this.min[i]) / range
+            }
+          }
         }
       }
     }
