@@ -13,6 +13,7 @@ buildscript {
 apply plugin: 'groovy'
 apply plugin: 'java'
 apply plugin: 'idea'
+apply plugin: 'eclipse'
 apply plugin: 'maven'
 
 jar.baseName = project.ext.artifactId
