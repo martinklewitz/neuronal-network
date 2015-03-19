@@ -8,12 +8,12 @@ public class NeurophLearnerApp {
     Date date = new Date()
     def dateName = date.toLocaleString()
     File f = new File(dateName + '-results.txt')
-    NeuralNetworkNeurophLearner networkNeurophLearner = new NeuralNetworkNeurophLearner(500, 0.02d, 0.10d)
+    NeuralNetworkNeurophLearner networkNeurophLearner = new NeuralNetworkNeurophLearner(300, 0.02d, 0.10d)
     Normalizer normalizer = new Normalizer()
     List<List<Double>> array = normalizer.read("train.csv").removeRow(0).spreadIntegerValueAsRows(54, 7).normalize().getData()
     Collections.shuffle(array)
     networkNeurophLearner.init(array, 54, 7)
-    [14, 15, 16].forEach {
+    [15].forEach {
       networkNeurophLearner.createNetwork(54, it, 7)
       networkNeurophLearner.learn()
 

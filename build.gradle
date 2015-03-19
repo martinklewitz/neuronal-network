@@ -37,6 +37,7 @@ dependencies {
   def springVersion = '4.0.3.RELEASE'
   compile('org.apache.mahout:mahout-core:0.9')
   compile('org.neuroph:neuroph-core:2.9')
+
   compile("org.springframework:spring-core:$springVersion")
 
   compile('org.codehaus.groovy:groovy-all:2.3.3')
