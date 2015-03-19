@@ -54,15 +54,6 @@ task tagGit << {
   }
 }
 
-task startApplication(dependsOn: assemble) {
-  doLast {
-    javaexec {
-      main = "-jar";
-      args = ["build/libs/${project.ext.artifactId}-${project.ext.version}.jar"]
-    }
-  }
-}
-
 task wrapper(type: Wrapper) {
   gradleVersion = '2.1'
 }
