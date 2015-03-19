@@ -27,6 +27,9 @@ sourceSets.test.groovy.srcDirs = ['src/test/java', 'src/test/groovy']
 repositories {
   mavenLocal()
   mavenCentral()
+  flatDir {
+    dirs 'lib'
+  }
 }
 
 compileJava {
