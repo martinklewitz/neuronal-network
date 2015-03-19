@@ -4,7 +4,7 @@ A learning project for machine learning and neuronal networks.
 
 ## Build
 
-gradlew build
+`gradlew build`
 
 ## examples
 
