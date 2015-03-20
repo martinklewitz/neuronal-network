@@ -33,7 +33,7 @@ class WekaLoadClassifierAndPredictApp {
       def predictionVector = tree.distributionForInstance(instance)
       def predictedValue = Utils.getMaxIndex(predictionVector) + 1
       println instance.toString(0) + " : " + predictedValue + " #### " + predictionVector
-      predictionFile.append(instance.toString(0) + ", " + predictedValue + "\n")
+      predictionFile.append(instance.toString(0) + "," + predictedValue + "\n")
       verteilung[predictedValue - 1]++
     }
 
