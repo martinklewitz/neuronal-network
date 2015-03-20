@@ -1,8 +1,9 @@
 package info.klewitz.kaggle.forest.weka
 
+import info.klewitz.kaggle.forest.utils.Utils
 import org.springframework.core.io.ClassPathResource
-import weka.classifiers.Evaluation
 import weka.classifiers.trees.J48
+import weka.core.Instance
 import weka.core.Instances
 import weka.core.SerializationHelper
 import weka.core.converters.ArffLoader
@@ -21,25 +22,33 @@ class WekaBuildClassifierAndPredictApp {
     String[] options = new String[1];
     options[0] = "-U";            // unpruned tree
     J48 tree = new J48();         // new instance of tree
-    tree.setOptions(options);     // set the options
+    //tree.setOptions(options);     // set the options
     tree.buildClassifier(testData);   // build classifier
 
-    println tree.globalInfo()
-    println tree
-    println tree.binarySplitsTipText()
+    //println tree.globalInfo()
+    //println tree
+    //println tree.binarySplitsTipText()
 
     ClassPathResource testFile = new ClassPathResource("test.arff")
     loader = new ArffLoader();
     loader.setSource(testFile.inputStream);
     Instances data = loader.getDataSet();
     data.setClassIndex(testData.numAttributes() - 1);
+    File predictionFile = new File("predictions2.txt")
 
-    Evaluation eTest = new Evaluation(data);
-    eTest.evaluateModelOnceAndRecordPrediction(tree, data)
-    def predictions = eTest.predictions()
+    def verteilung = [0, 0, 0, 0, 0, 0, 0]
 
-    println predictions
+    for (int i = 0; i < data.numInstances(); i++) {
+      Instance instance = data.instance(i)
+      def predictionVector = tree.distributionForInstance(instance)
+      def predictedValue = Utils.getMaxIndex(predictionVector) + 1
+      println instance.toString(0) + " : " + predictedValue + " #### " + predictionVector
+      predictionFile.append(instance.toString(0) + ", " + predictedValue + "\n")
 
+      verteilung[predictedValue - 1]++
+    }
+
+    println "Verteilung " + verteilung
     SerializationHelper.write("weka_model2.out", tree)
   }
 }
