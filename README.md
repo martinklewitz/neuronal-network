@@ -11,3 +11,5 @@ A learning project for machine learning and neuronal networks.
 See http://www.kaggle.com/c/forest-cover-type-prediction
 
 
+# Reading list
+
