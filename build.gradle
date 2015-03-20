@@ -41,7 +41,7 @@ dependencies {
   def springVersion = '4.0.3.RELEASE'
   compile('org.apache.mahout:mahout-core:0.9')
   compile('org.neuroph:neuroph-core:2.9')
-  compile('nz.ac.waikato.cms.weka:weka-stable:3.6.12')
+  compile('nz.ac.waikato.cms.weka:weka-dev:3.7.12')
 
   compile("org.springframework:spring-core:$springVersion")
 

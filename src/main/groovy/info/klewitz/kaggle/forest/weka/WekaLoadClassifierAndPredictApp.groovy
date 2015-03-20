@@ -8,33 +8,23 @@ import weka.core.Instances
 import weka.core.SerializationHelper
 import weka.core.converters.ArffLoader
 
-class WekaBuildClassifierAndPredictApp {
+class WekaLoadClassifierAndPredictApp {
 
   public static void main(String[] args) {
 
-    ClassPathResource inputFile = new ClassPathResource("train.arff")
+    def modelName = 'J48_C0.25_M2.model'
 
-    ArffLoader loader = new ArffLoader();
-    loader.setSource(inputFile.inputStream);
-    Instances testData = loader.getDataSet();
-    testData.setClassIndex(testData.numAttributes() - 1);
-
-    String[] options = new String[1];
-    options[0] = "-U";            // unpruned tree
-    J48 tree = new J48();         // new instance of tree
-    //tree.setOptions(options);     // set the options
-    tree.buildClassifier(testData);   // build classifier
-
-    //println tree.globalInfo()
-    //println tree
-    //println tree.binarySplitsTipText()
+    Object model = SerializationHelper.read(new ClassPathResource(modelName).inputStream)
+    J48 tree = (J48) model
+    println tree.globalInfo()
+    println tree
 
     ClassPathResource testFile = new ClassPathResource("test.arff")
-    loader = new ArffLoader();
+    ArffLoader loader = new ArffLoader();
     loader.setSource(testFile.inputStream);
     Instances data = loader.getDataSet();
-    data.setClassIndex(testData.numAttributes() - 1);
-    File predictionFile = new File("predictions2.txt")
+    data.setClassIndex(data.numAttributes() - 1);
+    File predictionFile = new File(modelName + "-predictions.txt")
 
     def verteilung = [0, 0, 0, 0, 0, 0, 0]
 
@@ -44,12 +34,10 @@ class WekaBuildClassifierAndPredictApp {
       def predictedValue = Utils.getMaxIndex(predictionVector) + 1
       println instance.toString(0) + " : " + predictedValue + " #### " + predictionVector
       predictionFile.append(instance.toString(0) + ", " + predictedValue + "\n")
-
       verteilung[predictedValue - 1]++
     }
 
     println "Verteilung " + verteilung
-    SerializationHelper.write("weka_model2.out", tree)
   }
 }
 
