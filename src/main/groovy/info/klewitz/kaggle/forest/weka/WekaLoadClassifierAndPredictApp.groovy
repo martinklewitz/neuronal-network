@@ -11,7 +11,7 @@ class WekaLoadClassifierAndPredictApp {
 
   public static void main(String[] args) {
 
-    def modelName = 'Randomforest_cross.model'
+    def modelName = 'random_forest_cleaned.model'
 
     Object model = SerializationHelper.read(new ClassPathResource(modelName).inputStream)
     AbstractClassifier tree = (AbstractClassifier) model
